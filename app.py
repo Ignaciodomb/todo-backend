@@ -1,11 +1,14 @@
 from distutils.sysconfig import PREFIX
 from flask import Flask, redirect
 
-from resources.task import Task
+from resources.task import Task, TaskList, TaskSearch
 from flask_restful import Api
 from flasgger import Swagger
 
+
 import os
+
+from db import db
 
 app = Flask(__name__)
 
@@ -32,13 +35,28 @@ app.config['SWAGGER'] = {
 }
 swagger = Swagger(app)
 
+def env_config(name, default):
+    app.config[name] = os.environ.get(name, default=default)
+
+#Database config
+env_config('SQLALCHEMY_DATABASE_URI','postgresql://postgres:postgres@localhost:5432/todo')
+#SQLAlchemy config
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['PROPAGATE_EXCEPTIONS'] = True
+app.config['SQLALCHEMY_ECHO'] = False
+
 @app.route("/")
 @app.route(f'{PREFIX}')
 def welcome():
     return redirect(f"{PREFIX}/apidocs", code =302)
 
 api.add_resource(Task, f'{PREFIX}/tasks/<id>')
-    
+api.add_resource(TaskList, f'{PREFIX}/tasks')
+api.add_resource(TaskSearch, f'{PREFIX}/search/tasks')    
+
 #Bloque opcional para ejecutar con python app.py 
 if __name__ == '__main__':
+    db.init_app(app)
     app.run()
+else: 
+    db.init_app(app)

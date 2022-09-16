@@ -1,0 +1,12 @@
+Lista de tarea
+---
+tags:
+- "task"
+responses: 
+  200:
+    description: Se obtiene la lista de tarea
+parameters: 
+  - name: page
+    in: query
+    default: 1 
+    description: Tareas actuales de la pagina
